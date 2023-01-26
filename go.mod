@@ -1,8 +1,12 @@
-module github.com/m15h4nya/meetuper
+module github.com/m15h4nya/meetupper
 
 go 1.19
 
-require github.com/bwmarrin/discordgo v0.27.0
+require (
+	github.com/bwmarrin/discordgo v0.27.0
+	github.com/pelletier/go-toml v1.9.5
+	github.com/thethanos/go-containers v0.2.0
+)
 
 require (
 	go.uber.org/atomic v1.7.0 // indirect

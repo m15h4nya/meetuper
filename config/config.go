@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type Session struct {
+type Config struct {
 	Token               string `toml:"token"`
 	AnnouncementChannel string `toml:"annoincement_channel_id"`
 	GuildID             string `toml:"guild_id"`

@@ -1,9 +1,9 @@
 package session
 
 import (
-	hndlrs "discord_logger/botSession/handlers"
-
 	"github.com/m15h4nya/meetupper/config"
+	"github.com/m15h4nya/meetupper/meetup"
+	"github.com/thethanos/go-containers/containers"
 
 	"github.com/bwmarrin/discordgo"
 	"go.uber.org/zap"
@@ -11,27 +11,43 @@ import (
 
 type Bot struct {
 	*discordgo.Session
-	log *zap.SugaredLogger
+	queuer *meetup.MeetupQueuer
+	log    *zap.SugaredLogger
+	cfg    *config.Config
 }
 
-func (b *Bot) CreateSession(cfg *config.Config, log *zap.SugaredLogger) {
-	handler := &hndlrs.Handler{Cfg: cfg, OptState: ""}
-	handlers := []interface{}{
-		handler.MessageCreate,
-		handler.MessageEdit,
-		handler.MessageDelete,
-		handler.MessageDeleteBulk,
-		handler.Ready,
-	}
+func CreateBot(cfg *config.Config, log *zap.SugaredLogger) Bot {
+	ch := make(chan meetup.Meetup, 10)
+	queue := containers.NewHeap[meetup.Meetup](
+		func(a, b meetup.Meetup) bool {
+			return b.Time.After(a.Time)
+		})
+	meetupQueuer := meetup.NewMeetupQueuer(ch, &queue)
 
 	var err error
-	b.Session, err = discordgo.New("Bot " + handler.Cfg.Token)
+	session, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	b.Session.StateEnabled = false
-	hndlrs.AddHandlers(b.Session, handlers)
+	session.StateEnabled = false
+
+	return Bot{
+		Session: session,
+		queuer:  &meetupQueuer,
+		log:     log,
+	}
+
+	// handler := &hndlrs.Handler{Cfg: cfg, OptState: ""}
+	// handlers := []interface{}{
+	// 	handler.MessageCreate,
+	// 	handler.MessageEdit,
+	// 	handler.MessageDelete,
+	// 	handler.MessageDeleteBulk,
+	// 	handler.Ready,
+	// }
+
+	// hndlrs.AddHandlers(bot.Session, handlers)
 }
 
 func (b *Bot) StartSession() {
@@ -39,6 +55,8 @@ func (b *Bot) StartSession() {
 	if err != nil {
 		b.log.Errorf("StartSession(): %s", err)
 	}
+
+	b.Session.GuildIntegrationCreate()
 }
 
 func (b *Bot) StopSession() {
