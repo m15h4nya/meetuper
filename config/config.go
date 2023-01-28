@@ -8,13 +8,21 @@ import (
 )
 
 type Config struct {
-	Token               string `toml:"token"`
-	AnnouncementChannel string `toml:"annoincement_channel_id"`
-	GuildID             string `toml:"guild_id"`
+	Session Session
+	IDs     IDs
 }
 
-func ParseConfig(log *zap.SugaredLogger) *Session {
-	cfg := &Session{}
+type Session struct {
+	Token string `toml:"token"`
+}
+
+type IDs struct {
+	AnnouncementChannelID string `toml:"annoincement_channel_id"`
+	GuildID               string `toml:"guild_id"`
+}
+
+func ParseConfig(log *zap.SugaredLogger) *Config {
+	cfg := &Config{}
 	file, err := os.ReadFile("./config/config.toml")
 
 	if err != nil {
