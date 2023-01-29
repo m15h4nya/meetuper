@@ -19,7 +19,7 @@ func (h *Handler) Ready(s *discordgo.Session, m *discordgo.Ready) {
 						Label:    "Create meetup",
 						Style:    discordgo.PrimaryButton,
 						Disabled: false,
-						CustomID: "create_meetup",
+						CustomID: "create_meetup_button",
 					},
 				},
 			},

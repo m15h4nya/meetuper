@@ -9,12 +9,14 @@ import (
 type MeetupQueuer struct {
 	returnChan chan<- Meetup
 	queue      *containers.Heap[Meetup]
+	drafts     map[string]Meetup
 }
 
 type Meetup struct {
-	Time    time.Time
-	Users   []string
+	Name    string
 	Message string
+	Users   []string
+	Time    time.Time
 }
 
 func NewMeetupQueuer(returnChan chan<- Meetup, queue *containers.Heap[Meetup]) MeetupQueuer {
@@ -35,6 +37,15 @@ func (queuer *MeetupQueuer) RunMeetupQueue() {
 	}
 }
 
-func (queuer *MeetupQueuer) PushMeetup(meetup Meetup) {
-	queuer.queue.Push(meetup)
+func (queuer *MeetupQueuer) GetDraft(id string) Meetup {
+	return queuer.drafts[id]
+}
+
+func (queuer *MeetupQueuer) UpdateDraft(id string, updated Meetup) {
+	queuer.drafts[id] = updated
+}
+
+func (queuer *MeetupQueuer) PushMeetup(id string) {
+	queuer.queue.Push(queuer.drafts[id])
+	delete(queuer.drafts, id)
 }

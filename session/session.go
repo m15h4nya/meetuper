@@ -38,7 +38,7 @@ func CreateBot(cfg *config.Config, log *zap.SugaredLogger) Bot {
 		log:     log,
 	}
 
-	handler := &hndlrs.Handler{Cfg: cfg}
+	handler := &hndlrs.Handler{Cfg: cfg, Log: log}
 	handlers := []interface{}{
 		// handler.MessageCreate,
 		// handler.MessageEdit,
