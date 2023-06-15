@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/bwmarrin/discordgo v0.27.0
 	github.com/pelletier/go-toml v1.9.5
-	github.com/thethanos/go-containers v0.2.0
 )
 
 require (

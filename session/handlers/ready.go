@@ -6,25 +6,30 @@ import (
 
 func (h *Handler) Ready(s *discordgo.Session, m *discordgo.Ready) {
 	msg := &discordgo.MessageSend{
-		Content: "Test message",
+		Content: "Create meetup",
 		Components: []discordgo.MessageComponent{
 			discordgo.ActionsRow{
 				Components: []discordgo.MessageComponent{
-					// discordgo.SelectMenu{
-					// 	MenuType:  discordgo.UserSelectMenu,
-					// 	CustomID:  "UsersToMention",
-					// 	MaxValues: 25,
-					// },
 					discordgo.Button{
 						Label:    "Create meetup",
 						Style:    discordgo.PrimaryButton,
 						Disabled: false,
 						CustomID: "create_meetup_button",
 					},
+					discordgo.Button{
+						Label:    "Change notification channel",
+						Style:    discordgo.PrimaryButton,
+						Disabled: false,
+						CustomID: "change_notification_channel",
+					},
 				},
 			},
 		},
 	}
-
-	s.ChannelMessageSendComplex(h.Cfg.IDs.AnnouncementChannelID, msg)
+	st, err := s.ChannelMessageSendComplex(h.Cfg.IDs.AnnouncementChannelID, msg)
+	if err != nil {
+		panic(err)
+	}
+	h.MainMessage[0] = st.ChannelID
+	h.MainMessage[1] = st.ID
 }
