@@ -36,7 +36,9 @@ func (q *MeetupQueuer) RunMeetupQueue() {
 		if !q.queue.Empty() && time.Now().After(q.queue.Top().Start) {
 			q.returnChan <- q.queue.Top()
 			q.queue.Pop()
+
 		}
+
 	}
 }
 

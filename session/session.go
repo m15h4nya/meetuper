@@ -12,19 +12,19 @@ import (
 
 type Bot struct {
 	*discordgo.Session
-	queuer *meetup.MeetupQueuer
-	log    *zap.SugaredLogger
-	meetup <-chan meetup.Meetup
-	cfg    *config.Config
+	queuer    *meetup.MeetupQueuer
+	log       *zap.SugaredLogger
+	getMeetup <-chan meetup.Meetup
+	cfg       *config.Config
 }
 
 func CreateBot(cfg *config.Config, log *zap.SugaredLogger) Bot {
-	ch := make(chan meetup.Meetup, 10)
+	rch := make(chan meetup.Meetup, 10)
 	queue := containers.NewHeap(
 		func(a, b meetup.Meetup) bool {
 			return b.Start.After(a.Start)
 		})
-	meetupQueuer := meetup.NewMeetupQueuer(ch, &queue)
+	meetupQueuer := meetup.NewMeetupQueuer(rch, &queue)
 
 	var err error
 	session, err := discordgo.New("Bot " + cfg.Session.Token)
@@ -33,16 +33,16 @@ func CreateBot(cfg *config.Config, log *zap.SugaredLogger) Bot {
 	}
 
 	session.StateEnabled = true
-
+	session.LogLevel = discordgo.LogDebug
 	bot := Bot{
-		Session: session,
-		queuer:  &meetupQueuer,
-		log:     log,
-		meetup:  ch,
-		cfg:     cfg,
+		Session:   session,
+		queuer:    &meetupQueuer,
+		log:       log,
+		getMeetup: rch,
+		cfg:       cfg,
 	}
 
-	handler := &hndlrs.Handler{Cfg: cfg, Log: log, Queuer: &meetupQueuer, MainMessage: make([]string, 2, 2)}
+	handler := &hndlrs.Handler{Cfg: cfg, Log: log, Queuer: &meetupQueuer, MainMessage: make([]string, 2)}
 	handlers := []interface{}{
 		handler.Ready,
 		handler.InteractionHandler,
@@ -59,7 +59,7 @@ func (b *Bot) StartSession() {
 	}
 	go func() {
 		for {
-			meetup := <-b.meetup
+			meetup := <-b.getMeetup
 			msgText := ""
 			for _, id := range tools.GetKeys(meetup.Users.Members) {
 				msgText += "<@" + id + "> "

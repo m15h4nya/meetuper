@@ -19,7 +19,7 @@ func (h Handler) createMeetup(s *discordgo.Session, i *discordgo.InteractionCrea
 		Data: DescriptionModal,
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }
@@ -40,20 +40,20 @@ func (h Handler) descriptionModal(s *discordgo.Session, i *discordgo.Interaction
 	loc, _ := time.LoadLocation("Local")
 	start, err := time.ParseInLocation("15:04 2/1/2006", data[2], loc)
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 
 	hours := hourRegEpx.FindString(data[3])
 	interval, err := time.ParseDuration("0")
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 	if hours != "" {
 		hoursCount, err := time.ParseDuration(hours)
 		if err != nil {
-			h.handlerError(err, i.Member.User.ID, s, i)
+			h.handleError(err, i.Member.User.ID, s, i)
 			return
 		}
 		interval += hoursCount
@@ -64,7 +64,7 @@ func (h Handler) descriptionModal(s *discordgo.Session, i *discordgo.Interaction
 		asRune := []rune(weeks)
 		weeksCount, err := strconv.Atoi(string(asRune[:len(asRune)-1]))
 		if err != nil {
-			h.handlerError(err, i.Member.User.ID, s, i)
+			h.handleError(err, i.Member.User.ID, s, i)
 			return
 		}
 		weeksInDays = weeksCount * 7
@@ -75,14 +75,14 @@ func (h Handler) descriptionModal(s *discordgo.Session, i *discordgo.Interaction
 		asRune := []rune(days)
 		daysCount, err = strconv.Atoi(string(asRune[:len(asRune)-1]))
 		if err != nil {
-			h.handlerError(err, i.Member.User.ID, s, i)
+			h.handleError(err, i.Member.User.ID, s, i)
 			return
 		}
 	}
 	daysCount += weeksInDays
 	daysInhours, err := time.ParseDuration(fmt.Sprint(daysCount*24) + "h")
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 	interval += daysInhours
@@ -98,7 +98,7 @@ func (h Handler) descriptionModal(s *discordgo.Session, i *discordgo.Interaction
 		Data: MentionableSelect,
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }
@@ -147,7 +147,7 @@ func (h Handler) mentionableSelect(s *discordgo.Session, i *discordgo.Interactio
 		Data: baseMessage,
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }
@@ -158,7 +158,7 @@ func (h Handler) channelSelectButton(s *discordgo.Session, i *discordgo.Interact
 		Data: ChannelSelect,
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }
@@ -204,7 +204,7 @@ func (h Handler) channelSelect(s *discordgo.Session, i *discordgo.InteractionCre
 		Data: baseMessage,
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }
@@ -241,7 +241,7 @@ func (h Handler) deleteMeetupButton(s *discordgo.Session, i *discordgo.Interacti
 		},
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }
@@ -251,6 +251,7 @@ func (h Handler) deleteMeetup(s *discordgo.Session, i *discordgo.InteractionCrea
 	for _, val := range raw {
 		h.Queuer.DeleteFromQueue(val)
 	}
+
 	isDisabled := true
 	if len(h.Queuer.GetAllMeetups()) > 0 {
 		isDisabled = false
@@ -288,7 +289,7 @@ func (h Handler) deleteMeetup(s *discordgo.Session, i *discordgo.InteractionCrea
 		Data: baseMessage,
 	})
 	if err != nil {
-		h.handlerError(err, i.Member.User.ID, s, i)
+		h.handleError(err, i.Member.User.ID, s, i)
 		return
 	}
 }

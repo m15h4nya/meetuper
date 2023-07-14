@@ -16,7 +16,7 @@ type Handler struct {
 	MainMessage []string
 }
 
-func (h Handler) handlerError(err error, id string, s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (h Handler) handleError(err error, id string, s *discordgo.Session, i *discordgo.InteractionCreate) {
 	h.Queuer.DeleteDraft(id)
 	h.Log.Error(err)
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
